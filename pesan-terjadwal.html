@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Pesan Terjadwal</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#000;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;color:#fff;overflow:hidden}
+#phone{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;background:#0b0b10;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+.status{display:flex;justify-content:space-between;padding:12px 26px 6px;font-size:15px;font-weight:600;z-index:5}
+.status.dark{color:#000}
+/* lock */
+#lock{background:radial-gradient(circle at 30% 20%,#2a1b3d,#0b0b10 70%);align-items:center}
+#lock .date{margin-top:40px;font-size:18px;opacity:.85}
+#lock .clock{font-size:84px;font-weight:300;line-height:1;margin-top:4px}
+#lock .nt{margin-top:22px;width:88%;background:rgba(255,255,255,.14);border-radius:18px;padding:12px 14px;font-size:14px;backdrop-filter:blur(12px);display:flex;gap:10px;align-items:flex-start}
+#lock .nt b{display:block;font-size:14px}
+#lock .nt span{opacity:.9}
+#pass{margin-top:auto;width:100%;padding:0 30px 40px;text-align:center}
+#pass h3{font-weight:400;font-size:19px;margin:0 0 14px}
+.dots{display:flex;justify-content:center;gap:16px;margin-bottom:22px;height:14px}
+.dots i{width:13px;height:13px;border-radius:50%;border:1.5px solid #fff}
+.dots i.f{background:#fff}
+.keys{display:grid;grid-template-columns:repeat(3,74px);gap:14px 22px;justify-content:center}
+.keys button{width:74px;height:74px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:30px;font-weight:300}
+.keys button:active{background:rgba(255,255,255,.4)}
+.keys .e{visibility:hidden}
+.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+/* home */
+#home{background:linear-gradient(160deg,#1c1030,#0e1a2e 60%,#0b0b10)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 8px;padding:30px 18px;text-align:center;font-size:12px}
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.ic{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px}
+.bdg{position:absolute;top:-6px;right:6px;background:#ff3b30;border-radius:50%;min-width:20px;height:20px;font-size:13px;display:none;align-items:center;justify-content:center;font-weight:600}
+.dock{margin-top:auto;margin-bottom:16px;display:flex;justify-content:space-around;background:rgba(255,255,255,.16);border-radius:30px;padding:14px 10px;margin-left:14px;margin-right:14px}
+.prog{text-align:center;font-size:12px;opacity:.5;padding-bottom:6px}
+/* app chrome */
+.apphead{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 10px;font-size:17px}
+.apphead .back{color:#0a84ff;font-size:17px;background:none;border:0;padding:6px 0}
+.apphead h2{margin:0;font-size:17px;font-weight:600}
+.body{flex:1;overflow:auto;padding:0 16px 24px}
+.hl{outline:0}
+/* light apps */
+.light{background:#f2f2f7;color:#000}
+.light .apphead .back{color:#ff9f0a}
+.cardl{background:#fff;border-radius:12px;margin:0 0 10px;overflow:hidden}
+.rowl{padding:13px 14px;border-bottom:1px solid #eee;font-size:16px;display:flex;gap:10px;align-items:center}
+.rowl:last-child{border:0}
+.circ{width:20px;height:20px;border-radius:50%;border:2px solid #aaa;flex:none}
+.flag{color:#ff9f0a;margin-left:auto}
+.ev{padding:12px 14px;border-left:4px solid #ff3b30;margin:8px 0;background:#fff;border-radius:8px;font-size:15px}
+.ev small{display:block;color:#777;margin-top:3px}
+.ev.x{border-color:#8e8e93}
+.safari{background:#1c1c1e}
+.tab{background:#2c2c2e;border-radius:14px;padding:14px;margin:0 0 10px;font-size:15px}
+.tab small{display:block;opacity:.6;margin-top:4px}
+.ph{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.ph div{aspect-ratio:1;display:flex;align-items:flex-end;padding:5px;font-size:11px}
+/* messages */
+.msgs{background:#000}
+.conv{display:flex;gap:12px;padding:12px 4px;border-bottom:1px solid #222;align-items:center}
+.conv .t{flex:1;min-width:0}
+.conv .t b{display:block;font-size:16px}
+.conv .t span{opacity:.6;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.un{width:11px;height:11px;border-radius:50%;background:#0a84ff;display:none}
+.av{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;display:flex;align-items:center;justify-content:center;background:#555;font-weight:600;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.bub{display:flex;gap:8px;margin:8px 0;align-items:flex-end}
+.bub .b{max-width:74%;padding:9px 13px;border-radius:18px;background:#26262a;font-size:15.5px;line-height:1.35}
+.bub .n{font-size:11px;opacity:.55;margin:0 0 2px 4px}
+.bub .av{width:28px;height:28px;font-size:12px}
+.sky{width:210px;height:130px;border-radius:12px;background:linear-gradient(#2f74d0,#9cc4f0);margin-top:6px;display:flex;align-items:flex-end;padding:8px;font-size:12px;color:#fff}
+.sysmsg{text-align:center;font-size:12px;opacity:.5;margin:14px 0}
+/* banner */
+#banner{position:absolute;top:8px;left:8px;right:8px;background:rgba(40,40,46,.96);border-radius:20px;padding:12px;display:flex;gap:10px;align-items:center;z-index:50;transform:translateY(-140%);transition:transform .4s;box-shadow:0 8px 30px #000a}
+#banner.show{transform:none}
+#banner b{font-size:14px;display:block}
+#banner span{font-size:13px;opacity:.85}
+#banner .av{width:36px;height:36px}
+/* call + end */
+#call{background:linear-gradient(#1a1a22,#000);align-items:center;z-index:60}
+#call .who{margin-top:90px;text-align:center}
+#call .who .av{width:110px;height:110px;margin:0 auto 18px;font-size:40px}
+#call h2{margin:0;font-weight:400;font-size:30px}
+#call .sub{opacity:.6;margin-top:6px}
+.cbtns{margin-top:auto;margin-bottom:70px;display:flex;gap:90px}
+.cbtns button{width:74px;height:74px;border-radius:50%;border:0;font-size:30px;color:#fff}
+.dec{background:#ff3b30}.acc{background:#30d158}
+#end{background:#000;align-items:center;justify-content:center;text-align:center;padding:34px;z-index:70}
+#end h1{font-size:15px;letter-spacing:4px;opacity:.5;font-weight:500}
+#end p{font-size:17px;line-height:1.6;opacity:.92}
+#end button{margin-top:26px;background:none;border:1px solid #555;color:#aaa;border-radius:20px;padding:10px 22px;font-size:14px}
+.found{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#ff453a;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:80;display:none}
+</style>
+</head>
+<body>
+<div id="phone">
+
+<!-- LOCK -->
+<section id="lock" class="screen on">
+  <div class="status"><span>23:48</span><span>5G ▮▮▮ 12%</span></div>
+  <div class="date">Minggu, 25 Oktober</div>
+  <div class="clock">23:48</div>
+  <div class="nt"><div class="av" style="width:34px;height:34px;font-size:13px">J</div><div><b>Pesan Terjadwal · Jevan</b><span>Kodenya tanggal lahirku. 14 Juli. Cuma itu.</span></div></div>
+  <div id="pass">
+    <h3>Masukkan Kode Sandi</h3>
+    <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+    <div class="keys" id="keys"></div>
+  </div>
+</section>
+
+<!-- HOME -->
+<section id="home" class="screen">
+  <div class="status"><span>23:48</span><span>5G ▮▮▮ 12%</span></div>
+  <div class="grid">
+    <div class="app" data-open="msgs"><div class="ic" style="background:#30d158">💬</div>Pesan<div class="bdg" id="bdg">0</div></div>
+    <div class="app" data-open="rem"><div class="ic" style="background:#ff9f0a">☑️</div>Pengingat</div>
+    <div class="app" data-open="cal"><div class="ic" style="background:#fff">📅</div>Kalender</div>
+    <div class="app" data-open="saf"><div class="ic" style="background:#0a84ff">🧭</div>Safari</div>
+    <div class="app" data-open="foto"><div class="ic" style="background:#ffd60a">🖼️</div>Foto</div>
+    <div class="app" data-open="tel"><div class="ic" style="background:#34c759">📞</div>Telepon</div>
+  </div>
+  <div style="flex:1"></div>
+  <div class="prog" id="prog">checkpoint 0 / 5</div>
+</section>
+
+<!-- REMINDERS -->
+<section id="rem" class="screen light">
+  <div class="status dark"><span>23:48</span><span>5G ▮▮▮</span></div>
+  <div class="apphead"><button class="back" data-home>‹ Beranda</button><h2>Pengingat</h2><span></span></div>
+  <div class="body">
+    <div class="cardl">
+      <div class="rowl"><span class="circ"></span>Beli kabel charger</div>
+      <div class="rowl"><span class="circ"></span>Balikin buku ke Arga</div>
+      <div class="rowl hl" data-cp="1"><span class="circ" style="border-color:#ff9f0a"></span>Jangan percaya yang balas duluan<span class="flag">⚑</span></div>
+      <div class="rowl"><span class="circ"></span>Cek tiket pulang</div>
+    </div>
+  </div>
+</section>
+
+<!-- CALENDAR -->
+<section id="cal" class="screen light">
+  <div class="status dark"><span>23:48</span><span>5G ▮▮▮</span></div>
+  <div class="apphead"><button class="back" data-home>‹ Beranda</button><h2>Oktober</h2><span></span></div>
+  <div class="body">
+    <div class="ev">Kuliah Pengantar Sosiologi<small>Jumat · 09.00</small></div>
+    <div class="ev">Nongkrong rooftop<small>Sabtu · 21.00 · Raka, Dimas, Arga, Jevan</small></div>
+    <div class="ev x hl" data-cp="2">(tanpa judul)<small>Sabtu · 23.40 · dibuat oleh Dimas, pukul 15.02</small></div>
+    <div class="ev">Servis motor<small>Senin · 10.00</small></div>
+  </div>
+</section>
+
+<!-- SAFARI -->
+<section id="saf" class="screen safari">
+  <div class="status"><span>23:48</span><span>5G ▮▮▮</span></div>
+  <div class="apphead"><button class="back" data-home>‹ Beranda</button><h2>4 Tab</h2><span></span></div>
+  <div class="body">
+    <div class="tab">jam matahari terbenam hari sabtu<small>google.com</small></div>
+    <div class="tab">cara mematikan riwayat lokasi<small>google.com</small></div>
+    <div class="tab hl" data-cp="3">Lokasi Dibagikan<small>Kamu membagikan lokasi ke 1 orang · Sabtu 22.58 · Arga</small></div>
+    <div class="tab">resep es buah rooftop<small>google.com</small></div>
+  </div>
+</section>
+
+<!-- FOTO -->
+<section id="foto" class="screen" style="background:#000">
+  <div class="status"><span>23:48</span><span>5G ▮▮▮</span></div>
+  <div class="apphead"><button class="back" data-home>‹ Beranda</button><h2>Semua Foto</h2><span></span></div>
+  <div class="body" style="padding:0 3px">
+    <div class="ph">
+      <div style="background:#3a2f55">Jum 14.10</div>
+      <div style="background:#2b4a3a">Jum 17.45</div>
+      <div style="background:#4d3a2b">Sab 18.20</div>
+      <div style="background:#25384f">Sab 20.58</div>
+      <div class="hl" data-cp="4" style="background:#1a1a24;outline:2px solid #ff453a;outline-offset:-2px">Sab 23.41</div>
+      <div style="background:#333">Sab 23.52</div>
+    </div>
+    <p style="font-size:13px;opacity:.5;padding:14px;text-align:center">Ketuk foto 23.41</p>
+  </div>
+</section>
+
+<!-- TELEPON -->
+<section id="tel" class="screen" style="background:#000">
+  <div class="status"><span>23:48</span><span>5G ▮▮▮</span></div>
+  <div class="apphead"><button class="back" data-home>‹ Beranda</button><h2>Terbaru</h2><span></span></div>
+  <div class="body">
+    <div class="conv"><div class="t"><b>Ibu</b><span>tidak terjawab · Sabtu</span></div></div>
+    <div class="conv"><div class="t"><b>Ibu</b><span>tidak terjawab · Sabtu</span></div></div>
+    <div class="conv"><div class="t"><b style="color:#ff453a">Ibu</b><span>tidak terjawab · Minggu</span></div></div>
+    <p style="opacity:.45;text-align:center;font-size:13px;padding-top:20px">Tidak ada yang bisa ditelepon malam ini.</p>
+  </div>
+</section>
+
+<!-- MESSAGES -->
+<section id="msgs" class="screen msgs">
+  <div class="status"><span>23:48</span><span>5G ▮▮▮</span></div>
+  <div class="apphead"><button class="back" data-home>‹ Beranda</button><h2 id="mt">Pesan</h2><span></span></div>
+  <div class="body" id="mbody"></div>
+</section>
+
+<!-- CALL -->
+<section id="call" class="screen">
+  <div class="who"><div class="av" id="callav">D</div><h2>Dimas</h2><div class="sub">FaceTime Audio…</div></div>
+  <div class="cbtns"><button class="dec" id="decl">✕</button><button class="acc" id="accp">✆</button></div>
+</section>
+
+<!-- END -->
+<section id="end" class="screen"><h1 id="endh"></h1><p id="endp"></p><button onclick="location.reload()">ulang dari awal</button></section>
+
+<div id="banner"><div class="av" id="bav">J</div><div><b id="btitle"></b><span id="btext"></span></div></div>
+<div class="found" id="found"></div>
+</div>
+
+<script>
+/* ====== PFP ====== ganti nama file kalau perlu, taruh di folder yang sama ====== */
+const PFP={jevan:"jevan.jpg",raka:"raka.jpg",dimas:"dimas.jpg",arga:"arga.jpg"};
+const NAME={jevan:"Jevan",raka:"Raka",dimas:"Dimas",arga:"Arga"};
+const COL={jevan:"#6b4a8a",raka:"#8a6b4a",dimas:"#3a7a9a",arga:"#4a4a4a"};
+function av(k,cls){return `<div class="av ${cls||''}" style="background:${COL[k]}"><img src="${PFP[k]}" alt="" onerror="this.remove()">${NAME[k][0]}</div>`}
+function $(s){return document.querySelector(s)}
+const phone=$("#phone");
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));$("#"+id).classList.add("on");if(id==="msgs")renderList()}
+
+/* ====== LOCK ====== */
+const CODE="1407";let entered="";
+const keys=$("#keys");
+["1","2","3","4","5","6","7","8","9","","0","⌫"].forEach(k=>{const b=document.createElement("button");b.textContent=k;if(!k)b.className="e";b.onclick=()=>press(k);keys.appendChild(b)});
+function press(k){
+  if(k==="⌫"){entered=entered.slice(0,-1)}else if(entered.length<4){entered+=k}
+  [...$("#dots").children].forEach((d,i)=>d.classList.toggle("f",i<entered.length));
+  if(entered.length===4){
+    if(entered===CODE){setTimeout(()=>{show("home");startGroup()},250)}
+    else{$("#pass").classList.add("shake");setTimeout(()=>{$("#pass").classList.remove("shake");entered="";[...$("#dots").children].forEach(d=>d.classList.remove("f"))},400)}
+  }
+}
+
+/* ====== STATE ====== */
+const found=new Set();
+const threads={
+  jevan:{title:"Jevan (Aku)",who:"jevan",msgs:[],unread:0},
+  grup:{title:"4 SEKAWAN",who:"grup",msgs:[],unread:0}
+};
+let current=null;
+
+const SCHEDULED={
+  1:"Kalau kamu baca ini, berarti HP-ku sudah di tanganmu. Jangan balas chat di grup dulu. Mereka bakal ngira kamu aku.",
+  2:"Acara terakhir di kalender itu bukan ide Raka. Undangannya dibuat jam 3 sore. Tapi Dimas bilang dia baru tahu soal rooftop jam 9 malam.",
+  3:"Malam itu aku bagi lokasi cuma ke satu orang. Bukan Dimas. Bukan Raka. Arga tahu persis aku di mana, dan dia nggak pernah bilang.",
+  4:"Ada tangan megang gelas pink di pojok foto itu. Cuma satu orang yang pesan minuman itu di rooftop. Tapi dia pamit pulang jam 11. Aku inget banget.",
+  5:"Dimas bilang dia di rumah dari jam 10. Foto langitnya dikirim jam 23.52, dan metadata-nya bilang rooftop. Aku jatuh bukan karena kepeleset."
+};
+
+function push(th,m){threads[th].msgs.push(m);if(current!==th){threads[th].unread++}updBadge();if($("#msgs").classList.contains("on")){current?renderThread():renderList()}}
+function updBadge(){const n=threads.jevan.unread+threads.grup.unread;const b=$("#bdg");b.style.display=n?"flex":"none";b.textContent=n}
+function banner(title,text,who){
+  $("#bav").outerHTML=av(who).replace('class="av ','id="bav" class="av ');
+  $("#btitle").textContent=title;$("#btext").textContent=text;
+  const bn=$("#banner");bn.classList.add("show");clearTimeout(bn._t);bn._t=setTimeout(()=>bn.classList.remove("show"),3800);
+  bn.onclick=()=>{bn.classList.remove("show");current=(who==="jevan")?"jevan":"grup";show("msgs");openThread(current)};
+}
+
+/* ====== MESSAGES UI ====== */
+function renderList(){
+  current=null;$("#mt").textContent="Pesan";
+  $("#mbody").innerHTML=["jevan","grup"].map(k=>{
+    const t=threads[k],last=t.msgs[t.msgs.length-1];
+    const prev=last?(last.html?"📷 Foto":last.text):"";
+    return `<div class="conv" data-th="${k}">${k==="jevan"?av("jevan"):'<div class="av" style="background:#333">👥</div>'}<div class="t"><b>${t.title}</b><span>${prev}</span></div><div class="un" style="display:${t.unread?'block':'none'}"></div></div>`
+  }).join("");
+  document.querySelectorAll("[data-th]").forEach(e=>e.onclick=()=>openThread(e.dataset.th));
+}
+function openThread(k){current=k;threads[k].unread=0;updBadge();renderThread()}
+function renderThread(){
+  const t=threads[current];$("#mt").textContent=t.title;
+  $("#mbody").innerHTML=`<div class="sysmsg">Pesan Terjadwal · Minggu 23.48</div>`+t.msgs.map((m,i)=>{
+    if(current==="jevan")return `<div class="bub">${av("jevan")}<div class="b">${m.text}</div></div>`;
+    return `<div class="bub">${av(m.who)}<div><div class="n">${NAME[m.who]}</div><div class="b">${m.text||""}${m.html||""}</div></div></div>`
+  }).join("");
+  const sky=$("#sky");if(sky)sky.onclick=()=>tap(5);
+  $("#mbody").scrollTop=1e5;
+  const bk=document.querySelector("#msgs .back");bk.dataset.home="";
+}
+document.addEventListener("click",e=>{
+  const h=e.target.closest("[data-home]");
+  if(h){ if(h.closest("#msgs")&&current){renderList();return} show("home");return }
+  const o=e.target.closest("[data-open]");if(o){current=null;show(o.dataset.open);return}
+  const c=e.target.closest("[data-cp]");if(c){tap(+c.dataset.cp)}
+});
+
+/* ====== CHECKPOINT ====== */
+function tap(n){
+  if(found.has(n))return;
+  found.add(n);
+  const f=$("#found");f.textContent="checkpoint "+found.size+" / 5";f.style.display="block";setTimeout(()=>f.style.display="none",1800);
+  $("#prog").textContent="checkpoint "+found.size+" / 5";
+  setTimeout(()=>{push("jevan",{text:SCHEDULED[n]});banner("Jevan (Aku)",SCHEDULED[n].slice(0,60)+"…","jevan")},900);
+  if(found.size===5)setTimeout(startCall,9000);
+}
+
+/* ====== GROUP CHAT (mengira kamu Jevan) ====== */
+function startGroup(){
+  const L=[
+   [1200,"raka","JEV?? lo online??"],
+   [3200,"raka","astaga, semua orang nyariin lo dari sabtu malam"],
+   [6000,"dimas","wkwk akhirnya. gue kira lo ngambek"],
+   [8500,"dimas","gue sih udah di rumah dari jam 10 malam itu, jadi gak tau apa2 ya"],
+   [11500,"dimas",null,`<div class="sky" id="sky">☁︎ langit bagus banget hari ini</div>`],
+   [15500,"arga","Jev."],
+   [18000,"arga","Jangan angkat telepon dari Dimas."]
+  ];
+  L.forEach(([d,w,t,h])=>setTimeout(()=>{push("grup",{who:w,text:t||"",html:h||""});banner("4 SEKAWAN · "+NAME[w],t||"foto",w)},d));
+}
+
+/* ====== CALL + ENDING ====== */
+function startCall(){
+  $("#callav").innerHTML=`<img src="${PFP.dimas}" alt="" onerror="this.remove()">D`;
+  show("call");
+}
+$("#accp").onclick=()=>ending("ENDING A — ANGKAT","\"Jev? Lo dengerin gue kan?\" ...Hening beberapa detik. \"Oh. Bukan lo ya.\"<br><br>Sambungan putus. Lima belas menit kemudian ada yang mengetuk pintumu, pelan, dua kali. Pintu kamu belum kamu kunci.");
+$("#decl").onclick=()=>ending("ENDING B — TOLAK","Telepon berhenti. Satu pesan terjadwal terakhir masuk:<br><br><i>\"Bagus. Sekarang hapus HP ini dan jangan pernah isi dayanya lagi.\"</i><br><br>Layar menyala sekali lagi. Lalu mati sendiri.");
+function ending(h,p){$("#endh").textContent=h;$("#endp").innerHTML=p;show("end")}
+</script>
+</body>
+</html>
